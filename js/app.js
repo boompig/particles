@@ -16,16 +16,30 @@ var app = angular.module("App", ['ngRoute', 'ngAnimate'])
         templateUrl: "views/achievements_carousel.html",
         controller: "CarouselCtrl",
         controllerAs: "c"
+    }).when("/colors/", {
+        templateUrl: "views/particle_colors.html",
+        controller: "ParticleCtrl",
+        controllerAs: "p"
+    }).when("/~dbkats/colors/", {
+        templateUrl: "views/particle_colors.html",
+        controller: "ParticleCtrl",
+        controllerAs: "p"
+    }).when("/~dbkats/particles/", {
+        templateUrl: "views/particles.html",
+        controller: "ParticleCtrl",
+        controllerAs: "p"
     });
 
     $locationProvider.html5Mode(true);
-}])
-.controller("MainCtrl", ['$route', '$routeParams', '$location', function ($route, $routeParams, $location) {
+}]);
+
+app.controller("MainCtrl", ['$route', '$routeParams', '$location', function ($route, $routeParams, $location) {
     this.$route = $route;
     this.$location = $location;
     this.$routeParams = $routeParams;
-}])
-.controller("CarouselCtrl", ['$routeParams', function ($routeParams) {
+}]);
+
+app.controller("CarouselCtrl", ['$routeParams', function ($routeParams) {
     /* the starting index in the carousel */
     this.carouselIndex = 0;
 
@@ -45,11 +59,5 @@ var app = angular.module("App", ['ngRoute', 'ngAnimate'])
     this.hideView = false;
 
     this.name = "carouselController";
-    this.params = $routeParams;
-}])
-.controller("ParticleCtrl", ['$routeParams', function ($routeParams) {
-    "use strict";
-
-    this.name = "particleController";
     this.params = $routeParams;
 }]);
