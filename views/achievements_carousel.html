@@ -1,0 +1,81 @@
+<canvas></canvas>
+
+<div class="container">
+    <div class="inner-container" id="main-container" ng-hide="c.hideView">
+        <h4>About Me</h4>
+
+        <p>I am currently a Yelp intern on the Release Engineering team. I received a Hon. B. Sc. from the
+        University of Toronto in the summer of 2014, with a Computer Science specialist and a math minor.
+        I will be starting a research Master's at the University of Toronto in September 2014, in
+        Distributed Systems</p>
+
+        <h4>Swagman</h4>
+
+        <p>Swagman is a mesos framework meant for distributed testing of Yelp-main.
+        It auto-scales as it is given more resources, and is meant to be both fault-tolerant and 
+        give better isolation for running tests.
+        The documentation can be found <a href="https://trac.yelpcorp.com/wiki/Swagman">here</a>.</p>
+
+        <h4>Particle Generator</h4>
+        <p>See it here</p>
+
+        <h4>Short List of Misc. Projects</h4>
+
+        <p>Here is an (incomplete) list of projects I have worked on at Yelp</p>
+
+        <div id="achievement-carousel" class="carousel slide" data-ride="carousel"
+            data-interval="false">
+            <!--<ol class="carousel-indicators">
+                <li data-target="#achievement-carousel" data-slide-to="0" class="active"></li>
+                <li data-target="#achievement-carousel" data-slide-to="1"></li>
+                <li data-target="#achievement-carousel" data-slide-to="2"></li>
+            </ol>-->
+
+            <div class="carousel-inner">
+                <div class="item active">
+                    <img src="img/bb_mgr_status.png" />
+                </div>
+
+                <div class="item">
+                    <img src="img/bb_mgr_timeline_2.png" />
+                </div>
+
+                <div class="item">
+                    <img src="img/bb_mgr_timeline_button.png" />
+                </div>
+            </div>
+
+            <a class="left carousel-control" href="#achievement-carousel" role="button"
+                data-slide="prev" ng-click="c.prevIndex()">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+            <a class="right carousel-control" href="#achievement-carousel" role="button"
+                data-slide="next" ng-click="c.nextIndex()">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </a>
+        </div>
+
+        <div class="below-carousel">
+            <div ng-if="c.carouselIndex === 0">
+                <h4>Buildbot manager status</h4>
+                <p>Buildbot manager now has build status on the front page. This allows to see, at a
+                glace, whether your build is done or not. Build status auto-refreshes, and is fetched
+                lazily (only within the current viewport) for efficiency. Auto-update is disabled on
+                window minimization or when the tab is in the background.</p>
+            </div>
+            <div ng-if="c.carouselIndex === 1">
+                <h4>Buildbot run timeline</h4>
+                <p>A visualization of a buildbot run, broken down by test case. Each row contains all
+                the tests being run on a given builder. Each green box is a testcase. The testcases are
+                ordered based on their actual interval of execution.</p>
+                <p>We used this view to get an idea of the bottlenecks in the current buildbot+testify
+                setup, in the lead-up to the creation of Swagman</p>
+            </div>
+            <div ng-if="c.carouselIndex === 2">
+                <h4>Buildbot run timeline link</h4>
+                <p>And here is the entry-point...</p>
+            </div>
+        </div>
+    </div>
+    <div class="hide-btn" ng-click="c.hideView=!c.hideView">{{ c.hideView ? "Show View" : "Hide View" }}</div>
+</div>
