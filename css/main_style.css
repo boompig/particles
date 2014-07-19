@@ -5,7 +5,8 @@ html {
 body {
     min-height: 100%;
     //background-color: #1550bc;
-    background-color: #ddd;
+    //background-color: #ddd;
+    background-color: #000;
 }
 
 #main-header {

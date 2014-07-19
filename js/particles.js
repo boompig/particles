@@ -17,6 +17,7 @@ $(window).resize(function() {
 
 var particles = [];
 var nebulae = [];
+var blackholes = [];
 
 /********** Simulation configuration options ********************/
 /*
@@ -25,13 +26,13 @@ var nebulae = [];
 var maxParticles = 250;
 
 /** refers to radius */
-var maxParticleSize = 6;
+var maxParticleSpawnSize = 4;
 
 /* refers to radius */
 var collapseSize = 8;
 
 /** refers to radius */
-var minParticleSize = 1;
+var minParticleSpawnSize = 1;
 
 /* this maximum is per direction */
 var maxMoveSpeed = 3;
@@ -49,7 +50,7 @@ var moveRate = 1000 / 24;
 var particleGenRange = 0;
 
 /** generate a new particle (in each nebula) every this many ms */
-var particleGenRate = 250;
+var particleGenRate = 1000;
 
 /* make a particle smaller */
 var ageThreshold = 100;
@@ -60,6 +61,10 @@ var growthAmt = 0.3;
 var minEnergy = 1;
 
 var maxEnergy = 100;
+
+var blackholeMass = 15;
+
+var blackholeAbsorbDistanceSq = 4;
 /**********************************************/
 
 /**
@@ -78,7 +83,7 @@ Nebula.prototype.draw = function () {
     ctx.strokeStyle = ctx.fillStyle;
 
     ctx.beginPath();
-    //ctx.arc(this.pos.x, this.pos.y, this.size + 1, 0, Math.PI * 2, true);
+    ctx.arc(this.pos.x, this.pos.y, this.size + 1, 0, Math.PI * 2, true);
     ctx.stroke();
     ctx.fill();
 };
@@ -103,6 +108,57 @@ Nebula.prototype.genRandomParticle = function () {
 
 Nebula.prototype.toString = function () {
     return "Nebula @ " + this.pos.toString() + " of size " + this.size + " generating at rate " + this.particleSpawnRate;
+};
+
+var BlackHole = function (pos, mass) {
+    this.pos = pos;
+    this.mass = mass;
+};
+
+/**
+ * return the particles which have *not* been absorbed
+ */
+BlackHole.prototype.absorb = function () {
+    var that = this;
+
+    var absorbed = particles.filter(function (particle) {
+        return particle.pos.distanceSqTo(that.pos) - Math.pow(particle.r, 2) <= blackholeAbsorbDistanceSq;
+    });
+
+    if (absorbed.length) console.log(absorbed.length);
+
+    return particles.filter(function (particle) {
+        return particle.pos.distanceSqTo(that.pos) - Math.pow(particle.r, 2) > blackholeAbsorbDistanceSq;
+    });
+};
+
+BlackHole.prototype.draw = function () {
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = "purple";
+    ctx.strokeStyle = ctx.fillStyle;
+
+    ctx.beginPath();
+    ctx.arc(this.pos.x, this.pos.y, Math.sqrt(blackholeAbsorbDistanceSq), 0, Math.PI * 2, true);
+    ctx.stroke();
+    ctx.fill();
+};
+
+/**
+ * Change the direction of nearby particles
+ */
+BlackHole.prototype.attract = function () {
+    // apply some acceleration based on F_g = GMm / r ** 2
+    // so the attraction on the smaller object should be GM / r ** 2
+    // will just say
+    // a = M (mass of black hole) / r ** 2
+    
+    var that = this;
+    
+    // distance to ALL particles
+    var acceleration = particles.map(function (particle) {
+        var a =  that.mass / particle.pos.distanceSqTo(that.pos);
+        particle.velocity.add(particle.pos.vectorTo(that.pos).scale(a));
+    });
 };
 
 /**
@@ -180,17 +236,22 @@ function numToHex(n) {
 }
 
 function randomSize() {
-    return randomInRange(minParticleSize, maxParticleSize);
-    //var avg = (maxParticleSize + minParticleSize) / 2;
-    //var dev = (maxParticleSize - minParticleSize) / 2;
-    //return simulateGaussian(avg, dev);
+    // I want the size to be more likely small than large
+    // return randomInRange(
+    //     Math.sqrt(minParticleSpawnSize),
+    //     Math.sqrt(maxParticleSpawnSize)
+    // ), 2);
+    // 
+    return randomInRange(minParticleSpawnSize, maxParticleSpawnSize);
 }
 
 /**
  * Return a random energy value
  */
 function randomEnergy() {
-    return randomInRange(minEnergy, maxEnergy);
+    // I want the energy to be more likely to be near the middle
+    return randomInRange(minEnergy / 2, maxEnergy / 2) + 
+    randomInRange(minEnergy / 2, maxEnergy / 2);
     //var avg = (maxEnergy + minEnergy) / 2;
     //var dev = (maxEnergy - minEnergy) / 2;
     //return simulateGaussian(avg, dev);
@@ -204,17 +265,28 @@ function energyColor(energy) {
     var delta = 1;
     var scaledEnergy = (energy / maxEnergy) * 255;
 
-    var r, g, b;
+    var r, g, b, dimFactor;
 
-    // very high energy guys should be blue, whereas low energy dudes should be red
-    if (energy > maxEnergy / 2) {
-        r = Math.floor(Math.max(0, 255 - scaledEnergy / 1.2));
-        g = Math.floor(Math.max(0, 255 - scaledEnergy / 1.2));
+    // this is a huge hack
+    // I'm trying to get blackbody radiation, but failing so hard
+    if (energy < maxEnergy / 4) {
+        // very low energy, radiate at red
+        dimFactor = 2;
+        b = Math.floor(Math.min(scaledEnergy * dimFactor, 255));
+        g = Math.floor(Math.min(scaledEnergy * dimFactor, 255));
+        r = 255;
+    } else if (energy > maxEnergy * 3 / 4) {
+        // very high energy, radiate at blue
+        dimFactor = 0.5;
+        r = Math.floor(Math.max(0, 255 - scaledEnergy * dimFactor));
+        g = Math.floor(Math.max(0, 255 - scaledEnergy * dimFactor));
         b = 255;
     } else {
-        b = Math.floor(Math.min(scaledEnergy * 4 / 3, 255));
-        g = Math.floor(Math.min(scaledEnergy * 4 / 3, 255));
+        // medium energy, radiate at yellow
         r = 255;
+        g = 255;
+        dimFactor = 1.5;
+        b = Math.floor(Math.min(scaledEnergy * dimFactor), 255);
     }
 
     return "#" + numToHex(r) + numToHex(g) + numToHex(b);
@@ -242,7 +314,8 @@ function drawAllTheThings () {
 
     // and draw the ones which are on-screen
     particles.map(function (p) { p.draw() });
-    nebulae.map(function(n) { n.draw() });
+    nebulae.map(function (n) { n.draw() });
+    blackholes.map(function (b) { b.draw() });
 }
 
 /**
@@ -250,7 +323,8 @@ function drawAllTheThings () {
  * Speed should be positively correlated with energy
  */
 function energyToSpeed(energy) {
-    return Math.sqrt(energy);
+    // I think a linear correlation is best
+    return energy / 20;
 }
 
 function energyToRandomVelocity(energy) {
@@ -286,6 +360,15 @@ function randomVector() {
 }
 
 function moveAllTheThings() {
+
+
+    // calculate black hole attraction
+    // cannot do map, as these operations must happen sequentially
+    for (var i = 0; i <  blackholes.length; i++) {
+        particles = blackholes[i].absorb();
+        blackholes[i].attract();
+    }
+
     particles.map(function (p) { p.move() });
 
     clearCanvas();
@@ -331,6 +414,11 @@ function beginAnimate() {
     nebulae = nebulaePos.map(function(p) {
         return new Nebula(p, particleGenRange, particleGenRate);
     });
+
+    blackholes = [
+        new BlackHole(new Vector(canvas.width / 2, canvas.height / 2), blackholeMass),
+        new BlackHole(new Vector(canvas.width / 4, canvas.height * 2 / 3), blackholeMass)
+    ];
 
     // start generating particles in each Nebula
     for (var i = 0; i < nebulae.length; i++) {

@@ -11,6 +11,11 @@ var app = angular.module("App", ['ngRoute', 'ngAnimate'])
         templateUrl: "views/achievements_carousel.html",
         controller: "CarouselCtrl",
         controllerAs: "c"
+    }).when("/", {
+        // also main view
+        templateUrl: "views/achievements_carousel.html",
+        controller: "CarouselCtrl",
+        controllerAs: "c"
     });
 
     $locationProvider.html5Mode(true);
