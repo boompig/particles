@@ -1,4 +1,4 @@
-node_modules
-bower_components
 js/min
 config.codekit
+node_modules
+bower_components
