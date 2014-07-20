@@ -28,6 +28,10 @@ var app = angular.module("App", ['ngRoute', 'ngAnimate'])
         templateUrl: "views/particles.html",
         controller: "ParticleCtrl",
         controllerAs: "p"
+    }).when("/~dbkats/particles/colors/", {
+        templateUrl: "/~dbkats/particles/views/particle_colors.html",
+        controller: "ColorCtrl",
+        controllerAs: "c"
     });
 
     $locationProvider.html5Mode(true);

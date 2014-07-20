@@ -11,6 +11,11 @@
         <!-- canvas at the top, spans the whole body -->
         <canvas></canvas>
 
+        <div class="links">
+            <a href="/~dbkats/particles/">Main</a>
+            <a href="/~dbkats/particles/colors">Colors</a>
+        </div>
+
         <div ng-view class="view-animate"></div>
 
         <script src="bower_components/jquery/jquery.min.js"></script>
@@ -26,8 +31,10 @@
         <!-- animation stuff -->
         <script src="js/vector.js"></script>
         <script src="js/utils.js"></script>
+        <script src="js/energy_utils.js"></script>
 
         <!-- angular animation stuff -->
         <script src="js/angular_controllers/particles.js"></script>
+        <script src="js/angular_controllers/color.js"></script>
     </body>
 </html>

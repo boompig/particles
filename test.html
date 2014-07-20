@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+		#box {
+			height: 100px;
+			width: 100px;
+			border: 1px solid black;
+		}
+		</style>
+	</head>
+<body>
+	<div id="box">
+	</div>
+
+	<div id="energyLabel"></div>
+	<input type="range" min="0" max="100" name="energy" id="energy" value="0"/>
+
+	<script src="js/utils.js"></script>
+	<script src="js/energy_utils.js"></script>
+
+	<script src="bower_components/jquery/jquery.js"></script>
+
+	<script>
+	$(function() {
+		var maxEnergy = 100;
+
+		$("#energy").change(function () {
+			var e = $("#energy").val();
+			var c = energyColor(e, maxEnergy);
+			$("#box").css("background-color", c);
+
+			$("#energyLabel").text(e);
+		});
+
+		$("#energy").change();
+	});
+	</script>
+</body>
+</html>

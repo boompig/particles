@@ -216,7 +216,7 @@ angular.module("App")
         if (this.dead) return;
 
         var ctx = $scope.canvas.getContext("2d");
-        ctx.fillStyle = energyColor(this.energy);
+        ctx.fillStyle = energyColor(this.energy, maxEnergy);
         ctx.strokeStyle = ctx.fillStyle;
 
         ctx.beginPath();
@@ -256,11 +256,6 @@ angular.module("App")
             Math.sqrt(this.velocity.sizeSq());
     };
 
-    function numToHex(n) {
-        var hex = n.toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-    }
-
     function randomSize() {
         // I want the size to be more likely small than large
         // return randomInRange(
@@ -281,59 +276,6 @@ angular.module("App")
         //var avg = (maxEnergy + minEnergy) / 2;
         //var dev = (maxEnergy - minEnergy) / 2;
         //return simulateGaussian(avg, dev);
-    }
-
-    /**
-      * Return a color based on the energy associated with a particle
-      */
-    function energyColor(energy) {
-        // var delta = 1;
-        var scaledEnergy = (energy / maxEnergy) * 255;
-
-        var r, g, b, dimFactor, s;
-
-        var blueRange = .75 * maxEnergy;
-        var redRange = .25 * maxEnergy
-
-        // this is a huge hack
-        // I'm trying to get blackbody radiation, but failing so hard
-        if (energy < redRange) {
-            // very low energy, radiate at red
-            // smooth transition from red to yellow
-            b = 0;
-            s = scale(0, redRange, 0, 255);
-            g = Math.floor(s(energy));
-            r = 255;
-        } else if (energy > blueRange) {
-            // very high energy, radiate at blue
-            
-            // smooth transition from white to bluer = Math.floor(scale(maxEnergy * .75, maxEnergy, 255, 0)(energy));
-            r = Math.floor(scale(blueRange, maxEnergy, 255, 0)(energy));
-            g = Math.floor(scale(blueRange, maxEnergy, 255, 0)(energy));
-
-            b = 255;
-        } else {
-            // medium energy, radiate at yellow
-            r = 255;
-            g = 255;
-
-            // smooth transition from bright yellow to absolute white
-            b = Math.floor(scale(redRange, blueRange, 0, 255)(energy));
-        }    
-
-        return "#" + numToHex(r) + numToHex(g) + numToHex(b);
-    }
-
-    /**
-     * Return a function which linearly scales from interval [a1, b1] to interval [a2, b2]
-     */
-    function scale (a1, b1, a2, b2) {
-        return function (x1) {
-            // in the interval [0, 1]
-            var t = (b1 - x1) / (b1 - a1);
-            // in the interval [a2, b2]
-            return t * (b2 - a2) + a2;
-        }
     }
 
     function clearCanvas() {
@@ -362,27 +304,9 @@ angular.module("App")
         blackholes.map(function (b) { b.draw() });
     }
 
-    /**
-     * Translate the energy of a particle into the speed at which it travels
-     * Speed should be positively correlated with energy
-     */
-    function energyToSpeed(energy) {
-        // I think a linear correlation is best
-        return energy / 20;
-    }
+    
 
-    function energyToRandomVelocity(energy) {
-        // go in some random direction
-        var angle = Math.random() * Math.PI * 2;
-
-        var x = Math.cos(angle);
-        var y = Math.sin(angle);
-        var speed = energyToSpeed(energy);
-
-        // convert energy to speed
-        return new Vector(x * speed, y * speed);
-
-    }
+    
 
     /**
      * Return a random velocity, constrained by maxMoveSpeed
